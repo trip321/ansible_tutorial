@@ -9,8 +9,22 @@
     dnf:
       state: latest
       update_cache: yes
+    when: ansible_distribution == "Redhat"
 
-  - name: install apache2 package
+  - name: install httpd package
     dnf:
       name: httpd
       state: latest
+    when: ansible_distribution == "Redhat"
+
+  - name: install php package
+    dnf:
+      name: php
+      state: latest
+    when: ansible_distribution == "Redhat"
+
+  - name: install apache2 package
+    dnf:
+      name: apache2
+      state: latest
+    when: ansible_distribution == "Ubuntu"
