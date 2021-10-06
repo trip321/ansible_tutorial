@@ -7,3 +7,6 @@
 [db_servers]
 172.16.1.7
 
+[workstations]
+172.16.1.6
+
