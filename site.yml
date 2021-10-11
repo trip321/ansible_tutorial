@@ -1,23 +1,34 @@
 ---
 
-
 - hosts: all
   become: true
   pre_tasks:
 
-  - name: install updates (RedHat)
+  - name: update repo cache (RedHat)
     tags: always
     dnf:
-      update_only: yes
       update_cache: yes
+    changed_when: false
     when: ansible_distribution == "RedHat"
 
-  - name: install updates (Ubuntu)
+  - name: update repo cache (Ubuntu)
     tags: always
     apt:
-      upgrade: dist
       update_cache: yes
+    changed_when: false
     when: ansible_distribution == "Ubuntu"
+
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name : add ssh key for simone
+    tags: always
+    authorized_key:
+      user: simone
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDgKU85/QspJUV+N1lhfZsvc9KXc0RNLfk6bQeaQAfWF ansible"
+
 
 - hosts: workstations
   become: true
@@ -57,6 +68,30 @@
         - php
       state: latest
     when: ansible_distribution == "RedHat"
+
+  - name: start httpd (RedHat)
+    tags: apache,redhat,httpd
+    service:
+      name: httpd
+      state: started
+      enabled: yes
+    when: ansible_distribution == "RedHat"
+
+  - name: change e-mail address for admin
+    tags: apachae,centos,httpd
+    lineinfile:
+      path: /etc/httpd/conf/httpd.conf
+      regex: '^ServerAdmin'
+      line: ServerAdmin somebody@somewhere.net
+    when: ansible_distribution == "RedHat"
+    register: httpd
+
+  - name: restart httpd (RedHat)
+    tags: apache,redhat,httpd
+    service:
+      name: httpd
+      state: restarted
+    when: httpd.changed
 
   - name: copy default html file for site
     tags: apache,apache2,httpd
