@@ -1,28 +1,17 @@
-- name: install httpd package (RedHat)
-  tags: apache,redhat,httpd
-  dnf:
+- name: install apache and php packages
+  tags: apache,httpd,php
+  package:
     name:
-      - httpd
-      - php
+      - "{{ apache_package_name }}"
+      - "{{ php_package_name }}"
     state: latest
-  when: ansible_distribution == "RedHat"
 
-- name: start and enable httpd (RedHat)
-  tags: apache,redhat,httpd
+- name: start and enable apache service
+  tags: apache,httpd
   service:
-    name: httpd
+    name: "{{ apache_service }}"
     state: started
     enabled: yes
-  when: ansible_distribution == "RedHat"
-
-- name: install apache2 package (Ubuntu)
-  tags: apache,apache2,ubuntu
-  apt:
-    name:
-      - apache2
-      - libapache2-mod-php
-    state: latest
-  when: ansible_distribution == "Ubuntu"
 
 - name: change e-mail address for admin
   tags: apache,centos,httpd
@@ -31,14 +20,14 @@
     regex: '^ServerAdmin'
     line: ServerAdmin somebody@somewhere.net
   when: ansible_distribution == "RedHat"
-  register: httpd
+  register: apache
 
-- name: restart httpd (RedHat)
-  tags: apache,redhat,httpd
+- name: restart httpd
+  tags: apache,httpd
   service:
-    name: httpd
+    name: "{{ apache_service }}"
     state: restarted
-  when: httpd.changed
+  when: apache.changed
 
 - name: copy default html file for site
   tags: apache,apache2,httpd
